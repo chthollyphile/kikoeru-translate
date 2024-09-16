@@ -16,6 +16,7 @@ worker_idle_seconds = common.getBackgroundIdleSeconds()
 kikoeru_url = common.getKikoeruUrl()
 kikoeru_user = common.getKikoeruUser()
 kikoeru_password = common.getKikoeruPassword()
+transcribe_params = common.getTrancribeParams()
 is_need_auth = False
 model: WhisperModel = None
 
@@ -63,7 +64,7 @@ def loginKikoeru(url:str, user:str, password:str)->str:
         print("token = ", kikoeru_token)
         return kikoeru_token
     else:
-        print("登陆失败")
+        print("登陆失败", response)
         return ""
 
 # return [success, not_task_can_acquire, task]
@@ -153,7 +154,7 @@ def format_seconds(
 # output complete lrc contents joined by '\n'
 def transcribe_audio(audio_path:str)->str:
     global model
-    segments, _ = model.transcribe(task="transcribe", audio=audio_path, language="zh")
+    segments, _ = model.transcribe(audio=audio_path, **transcribe_params)
     return "\n".join(
         map(
             lambda segment: f"{format_seconds(segment.start)} {segment.text}",
@@ -196,7 +197,11 @@ def processTask(task):
     if 'audio_file_name' not in task:
         print("下载音频文件")
         audio_file_name = f"{task['id']}{task['audio_ext']}"
-        downloadAudioFile(task, audio_file_name)
+        if not downloadAudioFile(task, audio_file_name):
+            finishTask(task, False, "音频下载失败")
+            os.unlink(task_file_path)
+            return
+
         task['audio_file_name'] = audio_file_name
         saveTaskToFile(task)
     else:
@@ -239,8 +244,13 @@ def load_model():
     model_path = common.getModelPath()
     device = common.getTranscribeDevice()
     compute_type = "default"
-    model = WhisperModel(model_path, device=device, compute_type=compute_type)
-    print("load model finished, start background loop, waiting for transcribe task")
+
+    try:
+        model = WhisperModel(model_path, device=device, compute_type=compute_type)
+        print("load model finished, start background loop, waiting for transcribe task")
+    except Exception as e:
+        print(f"Error loading model: {e}, program quit")
+        exit(1)
 
 def main():
     print("hello world: ")
@@ -248,6 +258,7 @@ def main():
     print("kikoeru_user = ", kikoeru_user)
     print("kikoeru_password = ", kikoeru_password)
     print("this translate worker name is: ", worker_name)
+    print("whisper model transcribe params:", transcribe_params)
     
     global is_need_auth
     global kikoeru_token

@@ -4,7 +4,9 @@ rmdir /s /q %DIST_FOLDER%
 mkdir %DIST_FOLDER%\cache
 
 echo build kikoeru worker exe
-pyinstaller .\run_kikoeru_worker.py
+pyinstaller run_kikoeru_worker.spec
+:: first time run pyinstaller to generate spec file
+:: pyinstaller .\run_kikoeru_worker.py --add-data="assets/*;assets/" 
 
 echo copy startup script
 xcopy scripts\kikoeru_worker_scripts\*.* %DIST_FOLDER%
@@ -14,3 +16,5 @@ xcopy cache\cudnn %DIST_FOLDER%\cache\cudnn /E /S /I
 
 echo copy model to dist
 robocopy .\cache\model %DIST_FOLDER%\cache\model /E /S
+
+explorer %DIST_FOLDER%

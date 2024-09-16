@@ -1,4 +1,5 @@
 import os
+import json
 import pysondb
 from pysondb.db import JsonDatabase
 
@@ -69,6 +70,31 @@ def saveToken(token:str):
 
 def getWorkerName()->str:
     return os.environ.get("WORKER_NAME", "default_worker")
+
+# 调用model.transcribe传入的可选参数
+def getTrancribeParams()->object:
+    # # phanton version
+    # default = {
+    #     'task': 'transcribe',
+    #     'language': 'zh'
+    # }
+
+    # 3500 version
+    default = {
+        'task': 'translate',
+        'language': 'ja',
+        'vad_filter': True,
+        'condition_on_previous_text': True,
+    }
+    params = default
+    try:
+        s = os.environ.get("TRANSCRIBE_PARAMS", "")
+        if s is not "":
+            params = json.loads(s)
+    except:
+        print("get transcribe params failed, fallback to ", default)
+        params = default
+    return params
 
 db_dir = ""
 def getTaskFilePath()->str:

@@ -11,3 +11,5 @@ build/
 dist/
 .venv/
 run_kikoeru_worker.bat
+docker-compose.yml
+db_data/

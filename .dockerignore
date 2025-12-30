@@ -1,0 +1,21 @@
+# Exclude unnecessary files and directories from the build context
+.git
+.gitignore
+.venv
+.vscode
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+dist
+build
+
+# Exclude large cache directories except for the model
+cache/cudnn
+cache/db
+cache/db_local_dev_cudnn9
+cache/input
+cache/output
+scripts
+# Keep cache/model as requested

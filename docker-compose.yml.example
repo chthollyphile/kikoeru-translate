@@ -1,0 +1,34 @@
+services:
+  kikoeru-translator:
+    image: kikoeru-translator:latest
+    container_name: kikoeru-translator
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      # Required Configurations
+      - KIKOERU_URL=http://your-kikoeru-server.com
+      - KIKOERU_USER=your_username
+      - KIKOERU_PASSWORD=your_password
+      - WORKER_NAME=docker_translator_compose
+      
+      # Optional: Adjust if needed
+      # - TRANSCRIBE_DEVICE=auto
+      # - BG_TASK_WAIT_SECS=5
+    
+    # enable GPU support (requires NVIDIA Container Toolkit)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+    volumes:
+      # Persist database (token storage, task state)
+      - ./db_data:/app/db
+      # Optional: Mount input/output if you want to inspect files on host (though they are caches)
+      # - ./cache_input:/app/cache/input
+      # - ./cache_output:/app/cache/output

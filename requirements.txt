@@ -1,7 +1,9 @@
-av==10.*
-ctranslate2>=3.17,<4
+av>=14.0.0
+ctranslate2==4.6.2
 huggingface_hub>=0.13
 tokenizers==0.13.*
 pysondb==1.6.2
 flask==3.0.0
 flask-cors==4.0.0
+requests==2.32.5
+onnxruntime==1.23.2

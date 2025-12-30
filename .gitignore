@@ -9,3 +9,5 @@ cache/
 __pycache__/
 build/
 dist/
+.venv/
+run_kikoeru_worker.bat

@@ -1,23 +1,25 @@
 services:
   kikoeru-translator:
-    image: kikoeru-translator:latest
+    # 从 Docker Hub 拉取镜像
+    image: docker.io/papersman/kikoeru-translator:latest
     container_name: kikoeru-translator
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # 如果你想本地构建，请取消以下注释
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      # Required Configurations
+      # 必填配置
       - KIKOERU_URL=http://your-kikoeru-server.com
-      - KIKOERU_USER=your_username
-      - KIKOERU_PASSWORD=your_password
+      - KIKOERU_USER=admin
+      - KIKOERU_PASSWORD=123456
       - WORKER_NAME=docker_translator_compose
       
-      # Optional: Adjust if needed
+      # 可选配置：根据需要调整
       # - TRANSCRIBE_DEVICE=auto
       # - BG_TASK_WAIT_SECS=5
     
-    # enable GPU support (requires NVIDIA Container Toolkit)
+    # 启用 GPU 支持 (需要 NVIIDA Container Toolkit)
     deploy:
       resources:
         reservations:
@@ -27,8 +29,8 @@ services:
               capabilities: [gpu]
 
     volumes:
-      # Persist database (token storage, task state)
+      # 持久化数据库 (存储 token 和任务状态)
       - ./db_data:/app/db
-      # Optional: Mount input/output if you want to inspect files on host (though they are caches)
+      # 可选：挂载输入/输出目录以在宿主机查看文件 (虽然是缓存)
       # - ./cache_input:/app/cache/input
       # - ./cache_output:/app/cache/output

@@ -1,6 +1,9 @@
 services:
   kikoeru-translator:
     # 从 Docker Hub 拉取镜像
+    # 有两个版本, latest 和 beta
+    # latest 包含默认的 large v2 3500 模型
+    # beta 包含 2025-10-24 新发布的基于5000小时数据集微调的 whisper-large-v2-translate-zh-v0.2-st-ct2 模型
     image: docker.io/papersman/kikoeru-translator:latest
     container_name: kikoeru-translator
     # 如果你想本地构建，请取消以下注释
@@ -18,6 +21,16 @@ services:
       # 可选配置：根据需要调整
       # - TRANSCRIBE_DEVICE=auto
       # - BG_TASK_WAIT_SECS=5
+
+      # 翻译参数设置：
+      # 如果你拉取的是 `latest` 镜像，则可以留空不填（默认会使用预设1）；
+      # 如果你拉取的是 `beta` 镜像，那么**必须**设置使用预设2。
+
+      # - 预设1 (3500 version):
+      # - 'TRANSCRIBE_PARAMS={"task": "translate", "language": "ja", "vad_filter": true, "condition_on_previous_text": true}'
+
+      # - 预设2 (5000 version):
+      # - 'TRANSCRIBE_PARAMS={"task": "translate", "language": "ja", "vad_filter": true, "vad_parameters": {"threshold": 0.5}, "condition_on_previous_text": true, "max_initial_timestamp": 30, "repetition_penalty": 1.1}'
     
     # 启用 GPU 支持 (需要 NVIIDA Container Toolkit)
     deploy:

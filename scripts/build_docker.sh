@@ -48,17 +48,59 @@ fi
 # 切换到项目根目录
 cd "$PROJECT_ROOT"
 
-# 构建镜像
-echo -e "${GREEN}构建 $IMAGE_NAME 镜像...${NC}"
-docker build -t "$DOCKER_HUB_USERNAME/$IMAGE_NAME:$DATE_TAG" \
-             -t "$DOCKER_HUB_USERNAME/$IMAGE_NAME:latest" \
-             -f Dockerfile \
-             .
+# 备份原始 model 目录
+if [ -d "cache/model" ]; then
+    echo -e "${YELLOW}备份 cache/model 目录...${NC}"
+    mv cache/model cache/model_backup
+fi
 
-# 推送镜像
-echo -e "${GREEN}推送镜像到 Docker Hub...${NC}"
-docker push "$DOCKER_HUB_USERNAME/$IMAGE_NAME:$DATE_TAG"
-docker push "$DOCKER_HUB_USERNAME/$IMAGE_NAME:latest"
+# ==========================================
+# 构建 3500 version (latest & date tag)
+# ==========================================
+if [ -d "cache/model-3500" ]; then
+    echo -e "${GREEN}Preparing 3500 model...${NC}"
+    cp -r cache/model-3500 cache/model
+    
+    echo -e "${GREEN}构建 $IMAGE_NAME:latest (3500 version) 镜像...${NC}"
+    docker build -t "$DOCKER_HUB_USERNAME/$IMAGE_NAME:$DATE_TAG" \
+                 -t "$DOCKER_HUB_USERNAME/$IMAGE_NAME:latest" \
+                 -f Dockerfile \
+                 .
+
+    echo -e "${GREEN}推送 3500 version 镜像到 Docker Hub...${NC}"
+    docker push "$DOCKER_HUB_USERNAME/$IMAGE_NAME:$DATE_TAG"
+    docker push "$DOCKER_HUB_USERNAME/$IMAGE_NAME:latest"
+    
+    rm -rf cache/model
+else
+    echo -e "${RED}Error: cache/model-3500 not found! Skipping latest build.${NC}"
+fi
+
+# ==========================================
+# 构建 5000 version (beta tag)
+# ==========================================
+if [ -d "cache/model-5000" ]; then
+    echo -e "${GREEN}Preparing 5000 model...${NC}"
+    cp -r cache/model-5000 cache/model
+    
+    echo -e "${GREEN}构建 $IMAGE_NAME:beta (5000 version) 镜像...${NC}"
+    docker build -t "$DOCKER_HUB_USERNAME/$IMAGE_NAME:beta" \
+                 -f Dockerfile \
+                 .
+
+    echo -e "${GREEN}推送 5000 version 镜像到 Docker Hub...${NC}"
+    docker push "$DOCKER_HUB_USERNAME/$IMAGE_NAME:beta"
+    
+    rm -rf cache/model
+else
+    echo -e "${RED}Error: cache/model-5000 not found! Skipping beta build.${NC}"
+fi
+
+# 恢复原始 model 目录
+if [ -d "cache/model_backup" ]; then
+    echo -e "${YELLOW}恢复 cache/model 目录...${NC}"
+    mv cache/model_backup cache/model
+fi
 
 echo ""
 echo -e "${GREEN}========================================${NC}"

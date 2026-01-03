@@ -25,6 +25,13 @@ echo -e "${GREEN}Docker 镜像构建和推送脚本${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 echo "项目根目录: $PROJECT_ROOT"
+
+if [ -z "$DOCKER_HUB_USERNAME" ]; then
+    echo -e "${RED}错误: 未设置 DOCKER_HUB_USERNAME 环境变量${NC}"
+    echo "请先设置环境变量: export DOCKER_HUB_USERNAME=your_dockerhub_username"
+    exit 1
+fi
+
 echo "Docker Hub 用户名: $DOCKER_HUB_USERNAME"
 echo "镜像名称: $IMAGE_NAME"
 echo "日期标签: $DATE_TAG"

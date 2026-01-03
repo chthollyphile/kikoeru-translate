@@ -86,10 +86,28 @@ def getTrancribeParams()->object:
         'vad_filter': True,
         'condition_on_previous_text': True,
     }
+    
+    # 5000 version (https://huggingface.co/chickenrice0721/whisper-large-v2-translate-zh-v0.2-st-ct2)
+    # credit: https://www.south-plus.net/read.php?tid-2690727-fpage-0-toread--page-1.html 
+    # default = {
+    #     'task': 'translate',
+    #     'language': 'ja',
+    #     'vad_filter': True,
+    #     'vad_parameters': {
+    #         # VAD检测阈值
+    #         # 太大会导致漏翻, 太小可能会导致时间轴不准或文本质量下降(幻听)
+    #         "threshold": 0.5,
+    #     },
+    #     'condition_on_previous_text': True,
+    #     # 避免时间轴向前偏移过长的问题
+    #     "max_initial_timestamp": 30,
+    #     "repetition_penalty": 1.1,
+    # }
+
     params = default
     try:
         s = os.environ.get("TRANSCRIBE_PARAMS", "")
-        if s is not "":
+        if s != "":
             params = json.loads(s)
     except:
         print("get transcribe params failed, fallback to ", default)

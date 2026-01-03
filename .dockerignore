@@ -19,3 +19,5 @@ cache/input
 cache/output
 scripts
 # Keep cache/model as requested
+cache/model_backup
+cache/model-*

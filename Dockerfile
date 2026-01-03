@@ -10,6 +10,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     INPUT_PATH=/app/cache/input \
     OUTPUT_PATH=/app/cache/output \
     MODEL_PATH=/app/cache/model \
+    # Optional: JSON string for transcription parameters
+    TRANSCRIBE_PARAMS="" \
     # Ensure CUDA libraries are in LD_LIBRARY_PATH
     LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda/lib64:/usr/lib/x86_64-linux-gnu
 

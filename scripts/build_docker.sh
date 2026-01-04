@@ -37,6 +37,61 @@ echo "镜像名称: $IMAGE_NAME"
 echo "日期标签: $DATE_TAG"
 echo ""
 
+# 构建选项
+BUILD_3500=false
+BUILD_5000=false
+
+# 解析命令行参数
+if [ $# -gt 0 ]; then
+    case "$1" in
+        all|a)
+            BUILD_3500=true
+            BUILD_5000=true
+            ;;
+        3500)
+            BUILD_3500=true
+            ;;
+        5000)
+            BUILD_5000=true
+            ;;
+        *)
+            echo -e "${RED}无效选项: $1${NC}"
+            echo "用法: $0 [all|3500|5000]"
+            exit 1
+            ;;
+    esac
+else
+    # 交互式选择
+    echo -e "${YELLOW}请选择构建选项:${NC}"
+    echo "  1) 全部构建 (3500 + 5000)"
+    echo "  2) 只构建 3500 (latest)"
+    echo "  3) 只构建 5000 (beta)"
+    echo ""
+    read -p "请输入选项 [1/2/3]: " -n 1 -r BUILD_CHOICE
+    echo ""
+    
+    case "$BUILD_CHOICE" in
+        1)
+            BUILD_3500=true
+            BUILD_5000=true
+            echo -e "${GREEN}将构建: 3500 (latest) + 5000 (beta)${NC}"
+            ;;
+        2)
+            BUILD_3500=true
+            echo -e "${GREEN}将构建: 3500 (latest)${NC}"
+            ;;
+        3)
+            BUILD_5000=true
+            echo -e "${GREEN}将构建: 5000 (beta)${NC}"
+            ;;
+        *)
+            echo -e "${RED}无效选项，取消操作${NC}"
+            exit 1
+            ;;
+    esac
+fi
+echo ""
+
 # 检查是否登录 Docker Hub
 # 注意：某些Docker版本或配置可能不显示Username，这里仅作简单检查
 if ! docker info 2>/dev/null | grep -q "Username"; then
@@ -64,7 +119,7 @@ fi
 # ==========================================
 # 构建 3500 version (latest & date tag)
 # ==========================================
-if [ -d "cache/model-3500" ]; then
+if [ "$BUILD_3500" = true ] && [ -d "cache/model-3500" ]; then
     echo -e "${GREEN}Preparing 3500 model...${NC}"
     cp -r cache/model-3500 cache/model
     
@@ -79,14 +134,14 @@ if [ -d "cache/model-3500" ]; then
     docker push "$DOCKER_HUB_USERNAME/$IMAGE_NAME:latest"
     
     rm -rf cache/model
-else
+elif [ "$BUILD_3500" = true ]; then
     echo -e "${RED}Error: cache/model-3500 not found! Skipping latest build.${NC}"
 fi
 
 # ==========================================
 # 构建 5000 version (beta tag)
 # ==========================================
-if [ -d "cache/model-5000" ]; then
+if [ "$BUILD_5000" = true ] && [ -d "cache/model-5000" ]; then
     echo -e "${GREEN}Preparing 5000 model...${NC}"
     cp -r cache/model-5000 cache/model
     
@@ -99,7 +154,7 @@ if [ -d "cache/model-5000" ]; then
     docker push "$DOCKER_HUB_USERNAME/$IMAGE_NAME:beta"
     
     rm -rf cache/model
-else
+elif [ "$BUILD_5000" = true ]; then
     echo -e "${RED}Error: cache/model-5000 not found! Skipping beta build.${NC}"
 fi
 
@@ -114,7 +169,12 @@ echo -e "${GREEN}========================================${NC}"
 echo -e "${GREEN}构建和推送完成！${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
-echo "镜像标签:"
-echo "  - $DOCKER_HUB_USERNAME/$IMAGE_NAME:$DATE_TAG"
-echo "  - $DOCKER_HUB_USERNAME/$IMAGE_NAME:latest"
+echo "已构建的镜像标签:"
+if [ "$BUILD_3500" = true ]; then
+    echo "  - $DOCKER_HUB_USERNAME/$IMAGE_NAME:$DATE_TAG"
+    echo "  - $DOCKER_HUB_USERNAME/$IMAGE_NAME:latest"
+fi
+if [ "$BUILD_5000" = true ]; then
+    echo "  - $DOCKER_HUB_USERNAME/$IMAGE_NAME:beta"
+fi
 echo ""
